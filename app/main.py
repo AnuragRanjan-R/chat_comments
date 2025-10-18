@@ -16,7 +16,7 @@ app = FastAPI()
 # Adjust allow_origins for your production frontend URL
 origins = [
     "http://localhost",
-    "http://localhost:3000",
+    "https://chat-comments-fnt-to3v.vercel.app/",
 ]
 
 app.add_middleware(
