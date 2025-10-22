@@ -30,7 +30,7 @@ app.add_middleware(
 # --- Authentication Endpoints ---
 
 @app.post("/token", response_model=schemas.Token)
-def login_for_access_token(db: Session = Depends(database.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(db: Session = Depends(database.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user = crud.get_user_by_email(db, email=form_data.username)
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
@@ -42,20 +42,20 @@ def login_for_access_token(db: Session = Depends(database.get_db), form_data: OA
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/register", response_model=schemas.User, status_code=status.HTTP_201_CREATED)
-def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+async def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_user(db=db, user=user)
 
 @app.get("/users/me", response_model=schemas.User)
-def read_users_me(current_user: schemas.User = Depends(auth.get_current_user)):
+async def read_users_me(current_user: schemas.User = Depends(auth.get_current_user)):
     return current_user
 
 # --- Comment Endpoints ---
 
 @app.get("/comments", response_model=List[schemas.Comment])
-def get_nested_comments(
+async def get_nested_comments(
     db: Session = Depends(database.get_db),
     limit: Optional[int] = Query(default=None, ge=1, description="Limit number of top-level comments returned"),
 ):
